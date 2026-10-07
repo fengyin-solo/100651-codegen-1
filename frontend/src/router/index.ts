@@ -19,6 +19,7 @@ const Valve = () => import('@/views/valve/index.vue')
 const Chem = () => import('@/views/chem/index.vue')
 const Equipmaint = () => import('@/views/equipmaint/index.vue')
 const Shift = () => import('@/views/shift/index.vue')
+const Watersign = () => import('@/views/watersign/index.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -42,6 +43,7 @@ const router = createRouter({
     { path: '/chem', name: 'chem', component: Chem },
     { path: '/equipmaint', name: 'equipmaint', component: Equipmaint },
     { path: '/shift', name: 'shift', component: Shift },
+    { path: '/watersign', name: 'watersign', component: Watersign },
   ],
 })
 
