@@ -24,6 +24,42 @@
       </span>
     </p>
 
+    <section class="todo-panel">
+      <h3 class="todo-title">接网待办（由用水报装接水完工自动回写）</h3>
+      <table class="data-table" v-if="todos.length">
+        <thead>
+          <tr>
+            <th>待办编号</th>
+            <th>报装编号</th>
+            <th>用户名称</th>
+            <th>接水点</th>
+            <th>接入管径</th>
+            <th>完工日期</th>
+            <th>接水结论</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="todo in todos" :key="String(todo.id)">
+            <td>{{ todo['调度编号'] }}</td>
+            <td>{{ todo['报装编号'] }}</td>
+            <td>{{ todo['用户名称'] }}</td>
+            <td>{{ todo['目标供水量'] }}</td>
+            <td>{{ todo['接入管径'] }}</td>
+            <td>{{ todo['完工日期'] }}</td>
+            <td>{{ todo['接水结论'] || '—' }}</td>
+            <td>{{ todo.status }}</td>
+            <td>
+              <button v-if="todo.pending" class="link" type="button" @click="finishTodo(todo)">办结</button>
+              <span v-else class="done-text">已办结</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p v-else class="empty-state todo-empty">暂无接网待办，报装单接水完工后会自动回写到这里</p>
+    </section>
+
     <form class="filter-bar" @submit.prevent="reload">
       <label v-for="field in filterFields" :key="field" class="filter-item">
         <span>{{ field }}</span>
@@ -74,7 +110,9 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  closeDispatchTodo,
   downloadEntries,
+  listDispatchTodos,
   listEntries,
   moduleMeta,
   runAction as applyAction,
@@ -88,6 +126,7 @@ const statuses = ["待下达", "执行中", "已完成", "已调整"]
 const stats = [{"label": "待下达指令", "value": 0}, {"label": "执行中指令", "value": 0}, {"label": "当日供水量", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
+const todos = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
@@ -98,6 +137,19 @@ const statusSummary = computed(() =>
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
 )
+
+function loadTodos() {
+  todos.value = listDispatchTodos()
+}
+
+function finishTodo(todo: EntryRow) {
+  const result = closeDispatchTodo(Number(todo.id))
+  if (!result.ok) {
+    errorMessage.value = result.message
+    return
+  }
+  loadTodos()
+}
 
 function resetFilters() {
   filters.value = {}
@@ -128,6 +180,7 @@ function reload() {
     const payload = listEntries(meta.key, filters.value)
     rows.value = payload.items
     total.value = payload.total
+    loadTodos()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '供水调度指令列表读取失败'
   }
@@ -135,3 +188,10 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.todo-panel { margin: 16px 0; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+.todo-title { margin: 0 0 10px; font-size: 15px; }
+.todo-empty { padding: 16px; }
+.done-text { color: var(--muted); font-size: 12px; }
+</style>

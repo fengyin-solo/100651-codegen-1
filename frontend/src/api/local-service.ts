@@ -2,6 +2,26 @@ import { MODULE_BY_KEY } from '@/data/modules'
 import { allRows, listRows, resetRows, saveRows } from '@/data/local-store'
 import type { ActionResult, EntryRow, ModuleMeta, OverviewResult, PageResult } from '@/data/types'
 
+// 用水报装与接入工程的领域动作（勘察/开工/完工、按时间段导出、历史册导入、回写接网待办）
+// 集中在 waterapply-service，这里一并转出，页面仍只认 local-service 这一个入口。
+export {
+  WATERAPPLY_FIELDS,
+  closeDispatchTodo,
+  createWaterApply,
+  diameterConflict,
+  effectiveDiameter,
+  exportWaterApply,
+  importWaterApply,
+  listDispatchTodos,
+  listWaterApply,
+  nextWaterApplyNo,
+  presentRow,
+  recordCompletion,
+  recordStart,
+  recordSurvey,
+} from './waterapply-service'
+export type { ExportWindow, ImportReport, WaterApplyExport } from './waterapply-service'
+
 // 会写进数据的「往回走」动作：命中就把这条记录标成异常态，看板上能一眼看出来。
 const NEGATIVE_ACTIONS = ['撤销', '作废', '拒绝', '驳回', '停用', '忽略', '下线', '回滚']
 
